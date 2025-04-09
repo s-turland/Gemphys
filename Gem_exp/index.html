@@ -7,11 +7,23 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="engine-string"> <h1>Advanced Physical Modelling Synthesizer</h1>
-    <p>String, Modal, and Hybrid Resonance engines. Includes "Levitation Chamber" resonator, Panning LFO, and Grain Delay. Play with keyboard (ASDFGHJK / WETYU rows).</p>
+    <p>String, Modal, and Hybrid Resonance engines. Includes "Levitation Chamber" resonator, Panning LFO, and Grain Delay. Play with computer keyboard (ASDFGHJK / WETYU rows) or select a MIDI input device.</p>
     <p>Use Mouse Wheel over controls below after selecting target.</p>
 
+    <!-- == MIDI Selection == -->
+    <div class="midi-controls control-group">
+        <label for="midiInDeviceSelector">MIDI Input:</label>
+        <select id="midiInDeviceSelector" name="midiInDeviceSelector">
+            <option value="">-- Select MIDI Device --</option>
+            <!-- MIDI devices will be populated here -->
+        </select>
+        <small id="midiStatus">MIDI support available. Select a device.</small>
+    </div>
+    <!-- ================== -->
+
+
     <div class="engine-switch control-group">
-        <label>Synth Engine:</label>
+         <label>Synth Engine:</label>
         <div>
             <input type="radio" id="engineString" name="engineType" value="string" checked>
             <label for="engineString">String</label>
@@ -23,7 +35,7 @@
     </div>
 
     <div class="controls">
-
+        <!-- ... All previous controls ... -->
         <!-- == Mouse Wheel Control Target == -->
         <div class="control-group mouse-wheel-selector">
              <label for="mouseWheelControlTarget">Mouse Wheel Controls:</label>
@@ -33,11 +45,11 @@
                  <option value="pluckiness">Pluck/Excitation</option>
                  <option value="chaosFeedback" class="modal-hybrid-wheel">Chaos Feedback</option>
                  <option value="modalMorph" class="modal-hybrid-wheel">Resonator Morph</option>
-                 <option value="panLfoRate">Pan LFO Rate</option> <!-- New -->
-                 <option value="panLfoDepth">Pan LFO Depth</option> <!-- New -->
+                 <option value="panLfoRate">Pan LFO Rate</option>
+                 <option value="panLfoDepth">Pan LFO Depth</option>
                  <option value="delayTime">Delay Time</option>
                  <option value="delayFeedback">Delay Feedback</option>
-                 <option value="grainAmount">Grain Amount</option> <!-- New -->
+                 <option value="grainAmount">Grain Amount</option>
                  <option value="filterCutoff">Filter Cutoff</option>
                  <option value="masterGain">Master Volume</option>
              </select>
@@ -46,9 +58,9 @@
 
         <!-- == General Controls == -->
         <div class="control-group">
-            <label for="frequency">Base Frequency (Key 'K' Hz): <span id="freq-value">440</span></label>
+            <label for="frequency">Base Frequency (A4 Hz): <span id="freq-value">440</span></label> <!-- Changed label slightly -->
             <input type="range" id="frequency" name="frequency" min="55" max="1760" value="440" step="1">
-            <small>(Sets root pitch for keyboard)</small>
+            <small>(Sets root pitch for MIDI A4/Key 'K')</small> <!-- Updated help text -->
         </div>
 
          <div class="control-group">
@@ -58,9 +70,9 @@
 
         <!-- == Engine Specific Root Level == -->
         <div class="control-group engine-specific string-specific hybrid-specific">
-            <label for="pluckiness" id="pluckiness-label">Pluck Stiffness (Timbre): <span id="pluckiness-value">0.5</span></label>
+            <label for="pluckiness" id="pluckiness-label">Pluck/Excite (Timbre/Vel): <span id="pluckiness-value">0.5</span></label> <!-- Updated label -->
             <input type="range" id="pluckiness" name="pluckiness" min="0.1" max="0.9" value="0.5" step="0.05">
-            <small id="pluckiness-help">(String: Brighter pluck. Hybrid: Excitation Brightness)</small>
+            <small id="pluckiness-help">(String: Brighter pluck. Hybrid: Excitation. Modulated by MIDI velocity.)</small> <!-- Updated help text -->
         </div>
 
         <!-- == Modal / Hybrid Specific Group (Includes Morphing & Chaos) == -->
@@ -77,7 +89,7 @@
                         <option value="bar">Metal Bar</option>
                         <option value="glass">Glass</option>
                         <option value="tube">Tube</option>
-                        <option value="levitationChamber">Levitation Chamber</option> <!-- New -->
+                        <option value="levitationChamber">Levitation Chamber</option>
                     </select>
                  </div>
                  <div class="control-group">
@@ -91,7 +103,7 @@
                         <option value="bar" selected>Metal Bar</option>
                         <option value="glass">Glass</option>
                         <option value="tube">Tube</option>
-                        <option value="levitationChamber">Levitation Chamber</option> <!-- New -->
+                        <option value="levitationChamber">Levitation Chamber</option>
                     </select>
                  </div>
             </div>
@@ -99,7 +111,7 @@
              <!-- Chaos Control -->
             <div class="control-group chaos-control">
                 <label for="chaosFeedback">Chaos Feedback: <span id="chaosFeedback-value">0.0</span></label>
-                <input type="range" id="chaosFeedback" name="chaosFeedback" min="0.0" max="0.9" value="0.0" step="0.01"> <!-- Max 0.9 for safety -->
+                <input type="range" id="chaosFeedback" name="chaosFeedback" min="0.0" max="0.9" value="0.0" step="0.01">
                  <small>(Careful! Internal resonator feedback. Creates instability.)</small>
             </div>
 
@@ -127,7 +139,7 @@
             <input type="range" id="delayTime" name="delayTime" min="0.01" max="1.0" value="0.3" step="0.01">
             <small>(Center delay time)</small>
         </div>
-         <div class="control-group"> <!-- New Grain Control -->
+         <div class="control-group">
             <label for="grainAmount">Grain Amount: <span id="grainAmount-value">0.0</span></label>
             <input type="range" id="grainAmount" name="grainAmount" min="0.0" max="0.05" value="0.0" step="0.001">
             <small>(Modulation depth for delay time - creates texture)</small>
@@ -152,21 +164,25 @@
             <input type="range" id="masterGain" name="masterGain" min="0" max="1" value="0.5" step="0.01">
         </div>
 
-        <!-- == Visualizers == -->
-        <div class="visualizer-container">
-            <div class="visualizer-group">
-                <h4>Oscilloscope</h4>
-                <canvas id="oscilloscopeCanvas"></canvas>
-            </div>
-            <div class="visualizer-group">
-                <h4>Spectrum</h4>
-                <canvas id="spectrumCanvas"></canvas>
-            </div>
+    </div> <!-- End of .controls -->
+
+    <!-- == Visualizers == -->
+    <div class="visualizer-container">
+        <!-- ... Visualizer canvases ... -->
+        <div class="visualizer-group">
+            <h4>Oscilloscope</h4>
+            <canvas id="oscilloscopeCanvas"></canvas>
         </div>
-
-        <button id="pluckButton">Trigger Note</button>
-
+         <div class="visualizer-group">
+             <h4>Spectrum</h4>
+             <canvas id="spectrumCanvas"></canvas>
+        </div>
     </div>
+
+    <!-- Trigger Button is optional now MIDI is available -->
+    <!-- <button id="pluckButton">Trigger Note</button> -->
+
+
     <script src="script.js"></script>
 </body>
 </html>

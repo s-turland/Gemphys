@@ -435,6 +435,49 @@ body.engine-hybrid #mouseWheelControlTarget .modal-hybrid-wheel { display: block
      margin-bottom: 5px;
 }
 
+/* --- MIDI Controls Styling --- */
+.midi-controls {
+    background-color: var(--controls-bg);
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column; /* Stack label, select, status */
+    align-items: center;
+    gap: 8px; /* Space elements vertically */
+    width: 90%;
+    max-width: 400px; /* Adjust width as needed */
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--box-shadow-light);
+}
+
+.midi-controls label {
+    font-weight: bold;
+    color: var(--label-color);
+    margin-bottom: 0;
+    font-size: 1em;
+    justify-content: center; /* Center the label */
+    width: 100%;
+}
+
+.midi-controls select {
+    width: 100%; /* Select takes full width */
+    max-width: 300px; /* Limit select width */
+}
+
+#midiStatus {
+    font-size: 0.85em;
+    color: var(--label-color);
+    opacity: 0.9;
+    text-align: center;
+    min-height: 1.3em; /* Reserve space */
+    width: 100%;
+}
+
+
+
 /* --- Visualizer Styling --- */
 .visualizer-container {
     display: flex;
