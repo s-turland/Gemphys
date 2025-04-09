@@ -434,3 +434,50 @@ body.engine-hybrid #mouseWheelControlTarget .modal-hybrid-wheel { display: block
      justify-content: flex-start; /* Align left */
      margin-bottom: 5px;
 }
+
+/* --- Visualizer Styling --- */
+.visualizer-container {
+    display: flex;
+    gap: 20px; /* Space between oscilloscope and spectrum */
+    width: 90%;
+    max-width: 650px; /* Match controls width */
+    margin-top: 25px; /* Space above visualizers */
+    margin-bottom: 15px; /* Space below visualizers before button */
+    background-color: var(--controls-bg); /* Same bg as controls */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--box-shadow-heavy);
+    border: 1px solid var(--border-color);
+}
+
+.visualizer-group {
+    flex: 1; /* Each visualizer takes equal space */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0; /* Prevent flex items from overflowing */
+}
+
+.visualizer-group h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--label-color);
+    font-size: 0.95em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+canvas {
+    display: block;
+    width: 100%; /* Fit container */
+    height: 100px; /* Fixed height */
+    background-color: var(--input-bg); /* Dark background for contrast */
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+/* Reposition Pluck Button (Moved outside .controls div in HTML) */
+#pluckButton {
+    margin-top: 15px; /* Add some space above it */
+    align-self: center; /* Keep it centered */
+}

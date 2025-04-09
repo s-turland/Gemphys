@@ -53,6 +53,11 @@ const panLfoRateValueSpan = document.getElementById('panLfoRate-value');
 const panLfoDepthValueSpan = document.getElementById('panLfoDepth-value');
 const grainAmountValueSpan = document.getElementById('grainAmount-value');
 
+// NEW Visualizer Canvas References
+const oscilloscopeCanvas = document.getElementById('oscilloscopeCanvas');
+const spectrumCanvas = document.getElementById('spectrumCanvas');
+let oscilloscopeCtx, spectrumCtx; // Will be assigned later
+
 
 // Mouse Wheel Control Target
 const mouseWheelControlTargetSelect = document.getElementById('mouseWheelControlTarget');
@@ -116,24 +121,41 @@ const delayLfo = audioContext.createOscillator();
 const delayLfoDepth = audioContext.createGain(); // Controls grain modulation amount
 
 
-// Connections
-summingBus.connect(masterFilter);
-masterFilter.connect(masterVolume);
-masterVolume.connect(audioContext.destination);
+// NEW Analyser Node
+const analyserNode = audioContext.createAnalyser();
+analyserNode.fftSize = 2048; // Power of 2. Determines resolution.
+analyserNode.smoothingTimeConstant = 0.85; // 0 to 1. Smoothes frequency data.
 
-summingBus.connect(delayInputGain);
+// Data arrays for visualization
+const analyserFrequencyCount = analyserNode.frequencyBinCount; // fftSize / 2
+const timeDataArray = new Uint8Array(analyserFrequencyCount); // For oscilloscope
+const frequencyDataArray = new Uint8Array(analyserFrequencyCount); // For spectrum
+
+// --- Connections (REVISED) ---
+summingBus.connect(masterFilter); // Direct signal to filter
+summingBus.connect(delayInputGain); // Direct signal to delay input
+
+// Delay Path
 delayInputGain.connect(delay);
 delay.connect(delayFeedback);
 delayFeedback.connect(delay);
 delay.connect(delayWetGain);
-delayWetGain.connect(masterFilter);
+delayWetGain.connect(masterFilter); // Delayed signal ALSO goes to filter
 
-// LFO Connections (Modulators to Parameters)
+// Filter connects to Analyser
+masterFilter.connect(analyserNode);
+
+// Analyser connects to Master Volume
+analyserNode.connect(masterVolume);
+
+// Master Volume connects to Output
+masterVolume.connect(audioContext.destination);
+
+// LFO Connections (remain the same, not part of main audio path)
 panLfo.connect(panLfoDepth);
-// panLfoDepth connects to each voice's pannerNode.pan parameter dynamically
-
+// panLfoDepth connects dynamically to each voice's pannerNode.pan
 delayLfo.connect(delayLfoDepth);
-delayLfoDepth.connect(delay.delayTime); // Modulates the delay time
+delayLfoDepth.connect(delay.delayTime);
 
 
 // Initial Effect Parameter Settings
@@ -801,8 +823,99 @@ function handleWheelControl(event) {
 controlsDiv.addEventListener('wheel', handleWheelControl, { passive: false }); // passive: false needed for preventDefault
 
 
+function drawOscilloscope() {
+    if (!oscilloscopeCtx) return; // Skip if context not ready
+
+    analyserNode.getByteTimeDomainData(timeDataArray); // Fill array with waveform data
+
+    oscilloscopeCtx.fillStyle = 'rgb(44, 62, 80)'; // Match --input-bg approx
+    oscilloscopeCtx.fillRect(0, 0, oscilloscopeCanvas.width, oscilloscopeCanvas.height);
+
+    oscilloscopeCtx.lineWidth = 2;
+    oscilloscopeCtx.strokeStyle = 'rgb(52, 152, 219)'; // Match --accent-color-primary
+
+    oscilloscopeCtx.beginPath();
+
+    const sliceWidth = oscilloscopeCanvas.width * 1.0 / analyserFrequencyCount;
+    let x = 0;
+
+    for (let i = 0; i < analyserFrequencyCount; i++) {
+        const v = timeDataArray[i] / 128.0; // Normalize to 0.0 - 2.0
+        const y = v * oscilloscopeCanvas.height / 2;
+
+        if (i === 0) {
+            oscilloscopeCtx.moveTo(x, y);
+        } else {
+            oscilloscopeCtx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+    }
+
+    oscilloscopeCtx.lineTo(oscilloscopeCanvas.width, oscilloscopeCanvas.height / 2);
+    oscilloscopeCtx.stroke();
+}
+
+function drawSpectrum() {
+    if (!spectrumCtx) return; // Skip if context not ready
+
+    analyserNode.getByteFrequencyData(frequencyDataArray); // Fill array with frequency data
+
+    spectrumCtx.fillStyle = 'rgb(44, 62, 80)'; // Match --input-bg approx
+    spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+
+    const barWidth = (spectrumCanvas.width / analyserFrequencyCount) * 2.5; // Adjust multiplier for spacing
+    let barHeight;
+    let x = 0;
+
+    for (let i = 0; i < analyserFrequencyCount; i++) {
+        barHeight = frequencyDataArray[i]; // Value from 0-255
+
+        // Use a gradient or accent color
+        // spectrumCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)'; // Simple heatmap example
+        spectrumCtx.fillStyle = 'rgb(46, 204, 113)'; // --accent-color-positive (greenish)
+
+        // Map bar height (0-255) to canvas height
+        const y = spectrumCanvas.height - (barHeight / 255 * spectrumCanvas.height);
+        spectrumCtx.fillRect(x, y, barWidth, spectrumCanvas.height - y);
+
+        x += barWidth + 1; // Add 1 for spacing between bars
+    }
+}
+
+// --- Animation Loop ---
+function visualize() {
+    // Call the drawing functions
+    drawOscilloscope();
+    drawSpectrum();
+
+    // Schedule the next frame
+    requestAnimationFrame(visualize);
+}
+
+
 // --- Initial Setup ---
 function initializeControlsAndAudio() {
+    // Get canvas contexts
+    if (oscilloscopeCanvas) oscilloscopeCtx = oscilloscopeCanvas.getContext('2d');
+    if (spectrumCanvas) spectrumCtx = spectrumCanvas.getContext('2d');
+
+     // Fix canvas HD-DPI scaling issues if contexts are available
+     function setupCanvas(canvas, ctx) {
+        if (!canvas || !ctx) return;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr); // Scale drawings
+        // Set width/height styles to ensure layout size is correct
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+    }
+    setupCanvas(oscilloscopeCanvas, oscilloscopeCtx);
+    setupCanvas(spectrumCanvas, spectrumCtx);
+
+
     // Set initial text values from default slider positions
     freqValueSpan.textContent = frequencySlider.value;
     pluckinessValueSpan.textContent = pluckinessSlider.value;
@@ -831,7 +944,7 @@ function initializeControlsAndAudio() {
     // Set initial audio param values explicitly from sliders
     const now = audioContext.currentTime; // Use current time for scheduling initial values
     masterFilter.frequency.setValueAtTime(parseFloat(filterCutoffSlider.value), now);
-    delay.delayTime.setValueAtTime(parseFloat(delayTimeSlider.value), now);
+    delay.delayTime.value = parseFloat(delayTimeSlider.value);
     delayFeedback.gain.setValueAtTime(parseFloat(delayFeedbackSlider.value), now);
     masterVolume.gain.setValueAtTime(parseFloat(masterGainSlider.value), now);
     // LFO params are set during their creation/initialization section above
@@ -841,6 +954,13 @@ function initializeControlsAndAudio() {
     document.getElementById('pluckiness')?.closest('.control-group')?.classList.add('engine-specific', 'string-specific', 'hybrid-specific');
     modalSpecificDiv?.classList.add('engine-specific', 'modal-specific', 'hybrid-specific');
     // Damping and Frequency groups should remain universally visible (no engine-specific class)
+
+    // Start the visualization loop!
+    if (oscilloscopeCtx || spectrumCtx) {
+        visualize();
+     } else {
+        console.warn("Canvas contexts not available, visualizations disabled.");
+     }
 
 }
 

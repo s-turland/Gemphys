@@ -152,6 +152,18 @@
             <input type="range" id="masterGain" name="masterGain" min="0" max="1" value="0.5" step="0.01">
         </div>
 
+        <!-- == Visualizers == -->
+        <div class="visualizer-container">
+            <div class="visualizer-group">
+                <h4>Oscilloscope</h4>
+                <canvas id="oscilloscopeCanvas"></canvas>
+            </div>
+            <div class="visualizer-group">
+                <h4>Spectrum</h4>
+                <canvas id="spectrumCanvas"></canvas>
+            </div>
+        </div>
+
         <button id="pluckButton">Trigger Note</button>
 
     </div>
