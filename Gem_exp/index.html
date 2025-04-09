@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Physical Modelling Synth</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="engine-string"> <h1>Advanced Physical Modelling Synthesizer</h1>
+    <p>String, Modal, and Hybrid Resonance engines. Includes "Levitation Chamber" resonator, Panning LFO, and Grain Delay. Play with keyboard (ASDFGHJK / WETYU rows).</p>
+    <p>Use Mouse Wheel over controls below after selecting target.</p>
+
+    <div class="engine-switch control-group">
+        <label>Synth Engine:</label>
+        <div>
+            <input type="radio" id="engineString" name="engineType" value="string" checked>
+            <label for="engineString">String</label>
+            <input type="radio" id="engineModal" name="engineType" value="modal">
+            <label for="engineModal">Modal</label>
+            <input type="radio" id="engineHybrid" name="engineType" value="hybrid">
+            <label for="engineHybrid">Hybrid</label>
+        </div>
+    </div>
+
+    <div class="controls">
+
+        <!-- == Mouse Wheel Control Target == -->
+        <div class="control-group mouse-wheel-selector">
+             <label for="mouseWheelControlTarget">Mouse Wheel Controls:</label>
+             <select id="mouseWheelControlTarget" name="mouseWheelControlTarget">
+                 <option value="frequency">Base Frequency</option>
+                 <option value="damping">Damping / Resonance</option>
+                 <option value="pluckiness">Pluck/Excitation</option>
+                 <option value="chaosFeedback" class="modal-hybrid-wheel">Chaos Feedback</option>
+                 <option value="modalMorph" class="modal-hybrid-wheel">Resonator Morph</option>
+                 <option value="panLfoRate">Pan LFO Rate</option> <!-- New -->
+                 <option value="panLfoDepth">Pan LFO Depth</option> <!-- New -->
+                 <option value="delayTime">Delay Time</option>
+                 <option value="delayFeedback">Delay Feedback</option>
+                 <option value="grainAmount">Grain Amount</option> <!-- New -->
+                 <option value="filterCutoff">Filter Cutoff</option>
+                 <option value="masterGain">Master Volume</option>
+             </select>
+        </div>
+        <hr>
+
+        <!-- == General Controls == -->
+        <div class="control-group">
+            <label for="frequency">Base Frequency (Key 'K' Hz): <span id="freq-value">440</span></label>
+            <input type="range" id="frequency" name="frequency" min="55" max="1760" value="440" step="1">
+            <small>(Sets root pitch for keyboard)</small>
+        </div>
+
+         <div class="control-group">
+            <label for="damping" id="damping-label">Damping (Decay): <span id="damping-value">0.996</span></label>
+            <input type="range" id="damping" name="damping" min="0.1" max="1.0" value="0.996" step="0.001"> <small id="damping-help">(String: Higher=longer. Modal/Hybrid: Lower=longer resonance)</small>
+        </div>
+
+        <!-- == Engine Specific Root Level == -->
+        <div class="control-group engine-specific string-specific hybrid-specific">
+            <label for="pluckiness" id="pluckiness-label">Pluck Stiffness (Timbre): <span id="pluckiness-value">0.5</span></label>
+            <input type="range" id="pluckiness" name="pluckiness" min="0.1" max="0.9" value="0.5" step="0.05">
+            <small id="pluckiness-help">(String: Brighter pluck. Hybrid: Excitation Brightness)</small>
+        </div>
+
+        <!-- == Modal / Hybrid Specific Group (Includes Morphing & Chaos) == -->
+        <div class="modal-hybrid-controls engine-specific modal-specific hybrid-specific">
+             <hr class="inner-group-hr">
+             <h4 id="resonator-legend">Resonator Controls</h4>
+
+             <!-- Morphing Controls -->
+             <div class="morph-group">
+                 <div class="control-group">
+                    <label for="modalPresetA">Resonator A:</label>
+                    <select id="modalPresetA" name="modalPresetA">
+                        <option value="bell">Bell</option>
+                        <option value="bar">Metal Bar</option>
+                        <option value="glass">Glass</option>
+                        <option value="tube">Tube</option>
+                        <option value="levitationChamber">Levitation Chamber</option> <!-- New -->
+                    </select>
+                 </div>
+                 <div class="control-group">
+                     <label for="modalMorph">Morph (A ↔ B): <span id="modalMorph-value">0.0</span></label>
+                    <input type="range" id="modalMorph" name="modalMorph" min="0.0" max="1.0" value="0.0" step="0.01">
+                 </div>
+                  <div class="control-group">
+                    <label for="modalPresetB">Resonator B:</label>
+                    <select id="modalPresetB" name="modalPresetB">
+                        <option value="bell">Bell</option>
+                        <option value="bar" selected>Metal Bar</option>
+                        <option value="glass">Glass</option>
+                        <option value="tube">Tube</option>
+                        <option value="levitationChamber">Levitation Chamber</option> <!-- New -->
+                    </select>
+                 </div>
+            </div>
+
+             <!-- Chaos Control -->
+            <div class="control-group chaos-control">
+                <label for="chaosFeedback">Chaos Feedback: <span id="chaosFeedback-value">0.0</span></label>
+                <input type="range" id="chaosFeedback" name="chaosFeedback" min="0.0" max="0.9" value="0.0" step="0.01"> <!-- Max 0.9 for safety -->
+                 <small>(Careful! Internal resonator feedback. Creates instability.)</small>
+            </div>
+
+             <hr class="inner-group-hr">
+        </div>
+        <!-- =============================================================== -->
+
+
+        <!-- == Effects == -->
+        <h4>Effects</h4>
+        <!-- Panning LFO -->
+         <div class="control-group">
+            <label for="panLfoRate">Pan LFO Rate (Hz): <span id="panLfoRate-value">0.5</span></label>
+            <input type="range" id="panLfoRate" name="panLfoRate" min="0.05" max="10" value="0.5" step="0.05">
+        </div>
+         <div class="control-group">
+            <label for="panLfoDepth">Pan LFO Depth: <span id="panLfoDepth-value">0.0</span></label>
+            <input type="range" id="panLfoDepth" name="panLfoDepth" min="0.0" max="1.0" value="0.0" step="0.01">
+             <small>(Amount of stereo movement)</small>
+        </div>
+         <hr class="effects-hr"> <!-- Separator -->
+         <!-- Delay -->
+         <div class="control-group">
+            <label for="delayTime">Delay Time (s): <span id="delayTime-value">0.3</span></label>
+            <input type="range" id="delayTime" name="delayTime" min="0.01" max="1.0" value="0.3" step="0.01">
+            <small>(Center delay time)</small>
+        </div>
+         <div class="control-group"> <!-- New Grain Control -->
+            <label for="grainAmount">Grain Amount: <span id="grainAmount-value">0.0</span></label>
+            <input type="range" id="grainAmount" name="grainAmount" min="0.0" max="0.05" value="0.0" step="0.001">
+            <small>(Modulation depth for delay time - creates texture)</small>
+        </div>
+         <div class="control-group">
+            <label for="delayFeedback">Delay Feedback: <span id="delayFeedback-value">0.4</span></label>
+            <input type="range" id="delayFeedback" name="delayFeedback" min="0.0" max="0.85" value="0.4" step="0.01">
+             <small>(Avoid high values)</small>
+        </div>
+         <hr class="effects-hr"> <!-- Separator -->
+         <!-- Filter -->
+         <div class="control-group">
+            <label for="filterCutoff">Filter Cutoff (Hz): <span id="filterCutoff-value">5000</span></label>
+            <input type="range" id="filterCutoff" name="filterCutoff" min="100" max="15000" value="5000" step="50">
+             <small>(Master low-pass filter)</small>
+        </div>
+
+        <hr>
+
+         <div class="control-group">
+            <label for="masterGain">Master Volume: <span id="masterGain-value">0.5</span></label>
+            <input type="range" id="masterGain" name="masterGain" min="0" max="1" value="0.5" step="0.01">
+        </div>
+
+        <button id="pluckButton">Trigger Note</button>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

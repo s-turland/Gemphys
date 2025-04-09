@@ -1,0 +1,436 @@
+/* --- Professional Synth Style --- */
+
+:root {
+    /* Color Palette */
+    --bg-color: #2c3e50; /* Dark Blue Grey */
+    --controls-bg: #34495e; /* Slightly Lighter Blue Grey */
+    --border-color: #4a6fa5; /* Muted Blue Border */
+    --input-bg: #2c3e50; /* Match background */
+    --text-color: #ecf0f1; /* Light Grey / Off-White */
+    --label-color: #bdc3c7; /* Lighter Grey for Labels */
+    --legend-color: #ffffff; /* White for Section Titles */
+    --value-color: #ffffff; /* White for Slider Values */
+    --accent-color-primary: #3498db; /* Vibrant Blue */
+    --accent-color-secondary: #2980b9; /* Darker Blue (Hover/Active) */
+    --accent-color-positive: #2ecc71; /* Green (Optional, e.g., for Trigger) */
+    --accent-color-warning: #e74c3c; /* Red (for Chaos warning) */
+    --disabled-color: #7f8c8d;
+
+    /* Typography */
+    --main-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    /* Spacing & Shadows */
+    --base-padding: 15px;
+    --control-gap: 18px; /* Increased slightly */
+    --fieldset-gap: 25px;
+    --box-shadow-light: 0 2px 5px rgba(0, 0, 0, 0.2);
+    --box-shadow-heavy: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* --- General Styling --- */
+body {
+    font-family: var(--main-font);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    line-height: 1.5;
+    font-size: 14px; /* Slightly smaller base size */
+}
+
+h1 {
+    color: var(--legend-color);
+    margin-bottom: 5px;
+    font-weight: 300; /* Lighter H1 */
+    font-size: 2.2em;
+    text-shadow: var(--text-shadow);
+}
+
+p {
+    color: var(--label-color);
+    margin-bottom: 15px;
+    text-align: center;
+    max-width: 600px;
+    font-size: 0.95em;
+}
+
+small {
+    font-size: 0.85em;
+    color: var(--label-color);
+    opacity: 0.8;
+    display: block; /* Ensure it takes space */
+    margin-top: 4px;
+    line-height: 1.3;
+}
+small.engine-tooltip { /* Tooltips updated by JS */
+    min-height: 1.3em; /* Reserve space */
+    font-style: italic;
+}
+
+hr { /* General HR styling */
+     border: none;
+     height: 1px;
+     background-color: var(--border-color);
+     opacity: 0.5;
+     margin: 15px 0;
+}
+
+hr.inner-group-hr { /* For inside modal/hybrid */
+     margin: 10px 0;
+     opacity: 0.3;
+}
+hr.effects-hr { /* For between effect groups */
+    margin: 5px 0;
+    opacity: 0.3;
+}
+
+
+/* --- Main Controls Container --- */
+.controls {
+    background-color: var(--controls-bg);
+    padding: var(--base-padding) calc(var(--base-padding) * 1.5);
+    border-radius: 8px;
+    box-shadow: var(--box-shadow-heavy);
+    display: flex;
+    flex-direction: column;
+    gap: var(--control-gap); /* Adjusted Gap slightly */
+    width: 90%;
+    max-width: 650px; /* Slightly wider maybe */
+    margin-top: 15px;
+    border: 1px solid var(--border-color);
+}
+
+/* --- Fieldsets and Legends (Structure) --- */
+fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: var(--base-padding);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--control-gap); /* Gap between controls inside */
+    transition: background-color 0.3s ease, border-color 0.3s ease; /* For active engine indication */
+    background-color: transparent; /* Default background */
+}
+fieldset.engine-specific {
+     display: none; /* Hidden by default */
+     /* Specific styling when active applied below */
+     border-left-width: 4px; /* Make space for indicator */
+     border-left-color: transparent;
+     padding-left: calc(var(--base-padding) - 3px); /* Adjust padding */
+}
+
+
+legend, h4 { /* Apply title styling to h4 as well */
+    padding: 0 5px;
+    font-weight: bold;
+    color: var(--legend-color);
+    font-size: 1.1em;
+    /* margin-left: 10px; /* Indent slightly */
+    margin-bottom: 5px; /* Space below title */
+    margin-top: 0;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+}
+.controls > h4 { /* Direct h4 children of .controls */
+    margin-top: -10px; /* Pull effects title up */
+    margin-bottom: 10px;
+}
+
+
+/* --- Control Groups (Label + Input pairs) --- */
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px; /* Slightly reduced gap */
+}
+
+/* Sub-groups for horizontal layouts like morph */
+.sub-control-group {
+     display: flex;
+     flex-direction: column;
+     gap: 4px;
+     flex-grow: 1;
+}
+.sub-control-group label { font-size: 0.9em;}
+.sub-control-group input[type="range"] { margin-top: 0;} /* Align better */
+
+label {
+    font-weight: normal; /* Less heavy labels */
+    color: var(--label-color);
+    font-size: 0.95em;
+    display: flex; /* Align value span */
+    justify-content: space-between; /* Push value span right */
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping */
+}
+
+/* Value display next to label */
+label span {
+    font-weight: bold;
+    background-color: transparent; /* Removed background */
+    padding: 2px 0px; /* Minimal padding */
+    border-radius: 0;
+    margin-left: 8px;
+    font-family: "Lucida Console", Monaco, monospace; /* Monospace for values */
+    font-size: 1em; /* Match label size */
+    color: var(--value-color);
+    text-align: right;
+    min-width: 45px; /* Ensure minimum space */
+    white-space: nowrap;
+}
+
+/* --- Input Elements --- */
+input[type="range"],
+input[type="text"], /* Example for other inputs */
+select {
+    width: 100%;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    padding: 8px 10px;
+    box-sizing: border-box; /* Include padding in width */
+    font-size: 0.95em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent-color-primary);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.5); /* Blue focus glow */
+}
+
+/* Sliders */
+input[type="range"] {
+    padding: 0; /* Remove padding for sliders */
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 20px; /* Total height including thumb */
+    background: transparent; /* Track is styled below */
+    margin-top: 4px;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: var(--input-bg); /* Darker track */
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+}
+input[type="range"]::-moz-range-track {
+     width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: var(--input-bg);
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 18px;
+    width: 18px;
+    background: var(--accent-color-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -7px; /* Vertically center thumb */
+    border: 2px solid var(--controls-bg); /* Border to lift it visually */
+    box-shadow: var(--box-shadow-light);
+     transition: background-color 0.2s ease;
+}
+input[type="range"]::-moz-range-thumb {
+    height: 16px; /* Adjust size for consistency */
+    width: 16px;
+    background: var(--accent-color-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--controls-bg);
+    box-shadow: var(--box-shadow-light);
+    transition: background-color 0.2s ease;
+}
+input[type="range"]:focus::-webkit-slider-thumb,
+input[type="range"]:hover::-webkit-slider-thumb {
+     background: var(--accent-color-secondary);
+}
+input[type="range"]:focus::-moz-range-thumb,
+input[type="range"]:hover::-moz-range-thumb {
+     background: var(--accent-color-secondary);
+}
+
+/* Select dropdown */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23bdc3c7%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Changed arrow color */
+    background-repeat: no-repeat;
+    background-position: right 10px top 50%;
+    background-size: 10px auto;
+    padding-right: 30px; /* Space for arrow */
+    cursor: pointer;
+}
+
+/* --- Button --- */
+button {
+    padding: 10px 20px;
+    font-size: 1em; /* Slightly smaller */
+    background: var(--accent-color-primary); /* Gradient */
+    /* background-image: linear-gradient(to bottom, var(--accent-color-primary), var(--accent-color-secondary)); */
+    color: white;
+    border: none; /* Remove border */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    align-self: center; /* Center within its container (e.g., fieldset) */
+    margin-top: 10px; /* Space above button */
+    box-shadow: var(--box-shadow-light);
+    font-weight: bold;
+}
+button:hover {
+    background: var(--accent-color-secondary);
+    /* background-image: none; */
+    box-shadow: var(--box-shadow-heavy);
+}
+button:active {
+    background-color: var(--accent-color-secondary);
+    transform: translateY(1px); /* Click effect */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+
+/* --- Engine Switch --- */
+.engine-switch {
+    background-color: var(--controls-bg);
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row; /* Horizontal Layout */
+    align-items: center;
+    gap: 20px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid var(--border-color);
+     box-shadow: var(--box-shadow-light);
+}
+.engine-switch > label { /* "Synth Engine:" */
+     font-weight: bold;
+     color: var(--label-color);
+     margin-bottom: 0;
+     font-size: 1em;
+     margin-right: 10px; /* Space after title */
+     flex-shrink: 0; /* Prevent shrinking */
+     justify-content: flex-start; /* Override label default */
+}
+.engine-switch div { /* Radio button container */
+    display: flex;
+    gap: 0px; /* No gap, use label styling for separation */
+}
+.engine-switch input[type="radio"] {
+   display: none; /* Hide actual radio */
+}
+.engine-switch label { /* Radio labels - Style as segmented control */
+    cursor: pointer;
+    font-weight: normal;
+    color: var(--label-color);
+    padding: 6px 14px;
+    border: 1px solid var(--border-color);
+    margin: 0;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    background-color: var(--input-bg);
+    font-size: 0.9em;
+}
+.engine-switch label:first-of-type { /* Target label within div */
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-right-width: 0.5px; /* Shared border */
+}
+.engine-switch label:last-of-type {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-left-width: 0.5px;
+}
+/* Middle button */
+.engine-switch label:not(:first-of-type):not(:last-of-type) {
+     border-left-width: 0.5px;
+     border-right-width: 0.5px;
+}
+
+.engine-switch input[type="radio"]:checked + label {
+    background-color: var(--accent-color-primary);
+    color: white;
+    border-color: var(--accent-color-primary);
+}
+.engine-switch input[type="radio"]:focus + label {
+    /* Optional: Add focus style to label */
+     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.5);
+     z-index: 1; /* Bring focus style above neighbours */
+     position: relative;
+}
+
+
+/* --- Control Visibility & Active Engine Styling --- */
+
+/* Hide/Show engine specific sections */
+body.engine-string .engine-specific.string-specific { display: flex; }
+body.engine-modal .engine-specific.modal-specific { display: flex; }
+body.engine-hybrid .engine-specific.hybrid-specific { display: flex; }
+
+
+/* Highlight active sections (Optional - can be distracting) */
+/*
+body.engine-string .string-specific { background-color: rgba(52, 152, 219, 0.05); border-left-color: var(--accent-color-primary);}
+body.engine-modal .modal-hybrid-controls { background-color: rgba(231, 76, 60, 0.05); border-left-color: var(--accent-color-warning); }
+body.engine-hybrid .modal-hybrid-controls { background-color: rgba(155, 89, 182, 0.05); border-left-color: #9b59b6; }
+body.engine-hybrid .string-specific { background-color: rgba(155, 89, 182, 0.05); border-left-color: #9b59b6; }
+*/
+/* Simplified Highlighting: Just the border */
+body.engine-string .string-specific { border-left-color: var(--accent-color-primary);}
+body.engine-modal .modal-hybrid-controls { border-left-color: var(--accent-color-warning); }
+body.engine-hybrid .modal-hybrid-controls { border-left-color: #9b59b6; } /* Purple for hybrid */
+body.engine-hybrid .string-specific { border-left-color: #9b59b6; } /* Hybrid uses pluck */
+
+
+/* Hide modal/hybrid options in wheel select if string active */
+body.engine-string #mouseWheelControlTarget .modal-hybrid-wheel { display: none; }
+body.engine-modal #mouseWheelControlTarget .modal-hybrid-wheel,
+body.engine-hybrid #mouseWheelControlTarget .modal-hybrid-wheel { display: block; }
+
+
+/* Specific tweaks */
+.modal-hybrid-controls .morph-group {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* PresetA | Morph Slider | PresetB */
+    gap: 15px;
+    align-items: end; /* Align bottoms of elements */
+    margin-bottom: 10px; /* Space below morph */
+}
+.modal-hybrid-controls .morph-group label { justify-content: center;} /* Center morph labels */
+
+.modal-hybrid-controls .chaos-control small {
+    color: var(--accent-color-warning);
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Mouse Wheel Selector styling */
+.mouse-wheel-selector {
+    padding: 10px 0 0 0;
+    border: none;
+    margin-bottom: -15px; /* Pull following group up */
+}
+.mouse-wheel-selector label {
+    font-weight: bold;
+     color: var(--label-color);
+     justify-content: flex-start; /* Align left */
+     margin-bottom: 5px;
+}
